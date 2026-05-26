@@ -1,0 +1,523 @@
+/*
+ * Basic styles for the heat diffusion simulator UI.  These
+ * classes arrange input controls, the canvas and playback
+ * widgets in a simple, responsive layout.  Feel free to
+ * adjust spacing or colours as desired, but keep the
+ * structure clear and uncluttered.
+ */
+
+/*
+ * Adopt an Apple‑inspired aesthetic throughout the app.  Colours, fonts and
+ * component styles are defined as custom properties on the root element so
+ * that the look and feel can be tuned centrally.  The design aims for a
+ * clean, modern appearance with gentle rounded corners and subtle drop
+ * shadows reminiscent of Apple’s own UIs.  Accent colours are kept to a
+ * tasteful minimum and text contrasts clearly against the background.
+ */
+
+:root {
+  /* Base palette */
+  --background-color: #f5f6f7;         /* very light grey for page background */
+  --card-background: #ffffff;          /* white cards for sections */
+  --card-border: #e5e6e8;              /* light border on cards */
+  --card-shadow: rgba(0, 0, 0, 0.05); /* subtle drop shadow */
+
+  /* Typography */
+  --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  --text-color: #1c1c1e;              /* dark text for strong contrast */
+  --subtext-color: #6c757d;            /* muted grey for secondary text */
+
+  /* Accent colours */
+  --primary-color: #007aff;            /* iconic iOS blue for primary actions */
+  --primary-hover: #0065d1;            /* darker blue on hover */
+  --secondary-color: #6c757d;          /* neutral grey for secondary actions */
+  --secondary-hover: #5a6268;          /* darker grey on hover */
+  --success-color: #34c759;            /* green for progress bars */
+  --warning-color: #ffc107;            /* yellow for highlight buttons */
+  --danger-color: #ff3b30;             /* red for delete buttons */
+
+  /* Sizing */
+  --card-radius: 12px;                 /* consistent corner rounding */
+  --button-radius: 8px;                /* softer buttons */
+  --transition-time: 0.2s;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+}
+
+header {
+  background-color: var(--card-background);
+  color: var(--text-color);
+  padding: 1rem 1.5rem;
+  text-align: center;
+  box-shadow: 0 2px 4px var(--card-shadow);
+  border-bottom: 1px solid var(--card-border);
+}
+
+/* Title styling: emphasise the app name with the primary accent colour and
+   a bold weight to mirror Apple’s minimalist typography. */
+header h1 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+main {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 1rem;
+  gap: 2rem;
+  justify-content: center;
+}
+
+/*
+ * Layout for the two main sections: material design (left) and simulation (right).
+ * Each section is styled similarly to the old controls panel and canvas container,
+ * with a white background, border and shadow.  The main element uses a flex
+ * container to arrange these side‑by‑side on large screens and stack them
+ * vertically on smaller displays.
+ */
+.material-section,
+.simulation-section {
+  flex: 1 1 400px;
+  max-width: 500px;
+  background-color: var(--card-background);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  padding: 1.25rem;
+  box-shadow: 0 4px 8px var(--card-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* Section headings */
+.material-section h2,
+.simulation-section h2 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+/* Container for canvas and its colour bar within each section */
+.visualization {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+/* Ensures canvases take up full available width and maintain aspect ratio */
+#heatCanvas,
+#designCanvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: 0 2px 4px var(--card-shadow);
+}
+
+/* Colour bar styling for both temperature and diffusivity scales */
+#colorBar,
+#diffColorBar {
+  border: 1px solid var(--card-border);
+  width: 100px;
+  max-height: 400px;
+  border-radius: var(--card-radius);
+  box-shadow: 0 2px 4px var(--card-shadow);
+}
+
+/* Container for colour bar and its label.  The label sits below the
+   bar and is centered. */
+.colorbar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100px;
+}
+
+/* Label for colour bars */
+.colorbar-label {
+  font-size: 0.75rem;
+  color: var(--subtext-color);
+  margin-top: 0.25rem;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Parameter panels inside each section */
+.material-section .parameters,
+.simulation-section .parameters {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Reuse control styling for inputs inside parameter panels */
+.material-section .control,
+.simulation-section .control {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.material-section .control label,
+.simulation-section .control label {
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+  color: var(--text-color);
+}
+
+.material-section .value-display,
+.simulation-section .value-display {
+  font-size: 0.85rem;
+  color: var(--subtext-color);
+  margin-top: 0.3rem;
+}
+
+/* Retain shape list container style */
+.material-section .shape-list-container {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  background-color: var(--card-background);
+  box-shadow: 0 2px 4px var(--card-shadow);
+}
+
+/* Buttons layout inside material section */
+.material-section .material-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Simulation parameters heading */
+.simulation-section .parameters h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
+}
+
+/* Playback controls remain same styling */
+.simulation-section .playback-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+/* Ensure frame slider stretches in simulation section playback */
+.simulation-section .frame-slider {
+  flex-grow: 1;
+  min-width: 150px;
+  max-width: 300px;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+}
+
+.control label {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.control input[type="range"] {
+  width: 100%;
+}
+
+.control .value-display {
+  font-size: 0.9rem;
+  color: #6c757d;
+  margin-top: 0.25rem;
+}
+
+button#runButton {
+  display: block;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  transition: background-color var(--transition-time) ease-in-out;
+}
+
+button#runButton:disabled {
+  background-color: var(--secondary-color);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+button#runButton:hover:not(:disabled) {
+  background-color: var(--primary-hover);
+}
+
+/* Progress bar */
+.progress-container {
+  margin-top: 1rem;
+  background-color: var(--card-border);
+  border-radius: var(--button-radius);
+  overflow: hidden;
+  height: 1rem;
+}
+
+.progress-bar {
+  width: 0;
+  height: 100%;
+  background-color: var(--success-color);
+  transition: width var(--transition-time) linear;
+}
+
+/* Canvas container */
+.canvas-container {
+  flex: 1 1 400px;
+  max-width: 500px;
+  background-color: var(--card-background);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  padding: 1rem;
+  box-shadow: 0 4px 8px var(--card-shadow);
+}
+
+.canvas-container h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+
+
+/* Container for heat map and colour bar */
+.heatmap-wrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+
+/* Playback controls */
+.playback-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.playback-controls button {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  transition: background-color var(--transition-time) ease-in-out;
+}
+
+.playback-controls button:hover {
+  background-color: var(--primary-hover);
+}
+
+/* Slider control for frame scrubbing.  The slider flexes to occupy
+   available horizontal space within the playback controls.  Min and
+   max widths are defined to prevent it from collapsing or overtaking
+   the layout. */
+.playback-controls .frame-slider {
+  flex-grow: 1;
+  min-width: 150px;
+  max-width: 300px;
+}
+
+.playback-info {
+  font-size: 0.85rem;
+  color: var(--subtext-color);
+}
+
+.hidden {
+  display: none;
+}
+
+/* Material design panel */
+.material-design {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+.material-design h3 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+/* Tool selector buttons layout */
+.tool-selector {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.tool-selector label {
+  font-weight: 500;
+  cursor: pointer;
+  user-select: none;
+  color: var(--text-color);
+}
+
+/* Subtitle above tool selector.  This label can be clicked to return
+   to selection mode. */
+/* Subtitle above tool selector.  Styled as a button so that it is
+   visually distinct and clearly pressable.  Users can click this
+   label to return to selection mode when editing shapes. */
+.tool-subtitle {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+  display: inline-block;
+  padding: 0.6rem 1rem;
+  background-color: var(--secondary-color);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--button-radius);
+  transition: background-color var(--transition-time) ease-in-out;
+  text-align: center;
+}
+
+.tool-subtitle:hover {
+  background-color: var(--secondary-hover);
+}
+
+/* Shape list styling */
+.shape-list-container {
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  background-color: var(--card-background);
+  box-shadow: 0 2px 4px var(--card-shadow);
+}
+
+.shape-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.shape-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid #e9ecef;
+  font-size: 0.9rem;
+}
+
+/* Highlight selected shape in the list */
+.shape-item.selected {
+  background-color: rgba(0, 122, 255, 0.1);
+  border-left: 3px solid var(--primary-color);
+}
+
+.shape-item:last-child {
+  border-bottom: none;
+}
+
+.shape-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.shape-actions button {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.8rem;
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+}
+
+.shape-actions button.highlight {
+  background-color: var(--warning-color);
+  color: var(--text-color);
+}
+
+.shape-actions button.delete {
+  background-color: var(--danger-color);
+  color: #fff;
+}
+
+.shape-actions input[type="checkbox"] {
+  margin-right: 0.25rem;
+}
+
+/* Buttons for material actions */
+.material-buttons {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Primary action buttons adopt the accent colour defined by Apple’s design
+   aesthetic.  They become slightly darker on hover and display a disabled
+   appearance when not usable. */
+.primary-button {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background-color: var(--primary-color);
+  color: #fff;
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  transition: background-color var(--transition-time) ease-in-out;
+}
+
+.primary-button:hover {
+  background-color: var(--primary-hover);
+}
+
+.primary-button:disabled {
+  background-color: var(--secondary-color);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Secondary actions use a neutral grey to fade into the background.  The
+   hover state darkens slightly to communicate interactivity. */
+.secondary-button {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background-color: var(--secondary-color);
+  color: #fff;
+  border: none;
+  border-radius: var(--button-radius);
+  cursor: pointer;
+  transition: background-color var(--transition-time) ease-in-out;
+}
+
+.secondary-button:hover {
+  background-color: var(--secondary-hover);
+}

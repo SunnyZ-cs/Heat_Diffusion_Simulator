@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Heat Diffusion Simulator</title>
+    <!-- Link our custom styles -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Heat Diffusion Simulator</h1>
+    </header>
+    <main>
+      <!-- Material design section (left) -->
+      <section id="materialSection" class="material-section">
+        <h2>Material Design</h2>
+        <div class="visualization">
+          <!-- Canvas for drawing and previewing material shapes -->
+          <canvas id="designCanvas" width="400" height="400"></canvas>
+          <!-- Colour bar for diffusivity scale -->
+          <div class="colorbar-container">
+            <canvas id="diffColorBar" width="100" height="400"></canvas>
+            <div class="colorbar-label">Thermal Diffusivity (m²/s)</div>
+          </div>
+        </div>
+        <div class="parameters">
+          <!-- Tool selection: rectangle, ellipse; Select mode button sits outside -->
+          <div class="tool-selector">
+            <label><input type="radio" name="tool" id="toolRectangle" value="rectangle" /> Rectangle</label>
+            <label><input type="radio" name="tool" id="toolEllipse" value="ellipse" /> Ellipse</label>
+          </div>
+          <!-- Subtitle for tool selection.  Styled as a button to clearly indicate
+               it is clickable.  Clicking this label returns to selection mode. -->
+          <div id="selectShapeLabel" class="tool-subtitle">Select Shape</div>
+          <!-- Diffusivity for new shapes -->
+          <div class="control">
+            <label for="shapeDiffusivity">Shape diffusivity</label>
+            <!-- Adjust range and default value to 0–3.0 for diffusivity.  Use a fine step
+                 of 0.01 for precision and set the initial value to 0.00 so the base
+                 material starts as deep blue. -->
+            <input type="range" id="shapeDiffusivity" min="0" max="3.0" step="0.01" value="0" />
+            <div class="value-display">
+              <span id="shapeDiffusivityValue">0.00</span>
+            </div>
+          </div>
+          <!-- List of shapes -->
+          <div class="shape-list-container">
+            <h4>Added Shapes</h4>
+            <ul id="shapeList" class="shape-list"></ul>
+          </div>
+          <!-- Buttons for design actions -->
+          <div class="material-buttons">
+            <button id="clearShapesButton" class="secondary-button" type="button">Clear All Shapes</button>
+            <button id="runMaterialButton" class="primary-button" type="button">Run with Material</button>
+          </div>
+        </div>
+      </section>
+      <!-- Simulation section (right) -->
+      <section id="simulationSection" class="simulation-section">
+        <h2>Simulation</h2>
+        <div class="visualization">
+          <!-- Primary heat map canvas -->
+          <canvas id="heatCanvas" width="400" height="400"></canvas>
+          <!-- Colour bar showing the temperature scale -->
+          <div class="colorbar-container">
+            <canvas id="colorBar" width="100" height="400"></canvas>
+            <div class="colorbar-label">Temperature (°C)</div>
+          </div>
+        </div>
+        <!-- Playback controls appear below the heat map -->
+        <div id="playbackControls" class="playback-controls hidden">
+          <!-- Play/Pause button toggles automatic playback -->
+          <button id="playPauseButton">Play</button>
+          <!-- Slider to scrub through frames manually.  Initially disabled until frames are loaded. -->
+          <input
+            type="range"
+            id="frameSlider"
+            class="frame-slider"
+            min="0"
+            max="0"
+            value="0"
+            step="1"
+            disabled
+          />
+          <div class="playback-info">
+            <span id="frameIndicator">Frame 0/0</span>
+          </div>
+          <div class="playback-info">
+            <span id="timeIndicator">Time: 0.0s</span>
+          </div>
+        </div>
+        <div class="parameters">
+          <h3>Simulation Parameters</h3>
+          <!-- Total simulation time -->
+          <div class="control">
+            <label for="totalTime">Total simulation time (seconds)</label>
+            <input
+              type="range"
+              id="totalTime"
+              min="0.1"
+              max="2.0"
+              step="0.1"
+              value="1.0"
+            />
+            <div class="value-display">
+              <span id="totalTimeValue">1.0</span>s
+            </div>
+          </div>
+          <!-- Initial temperature -->
+          <div class="control">
+            <label for="initialTemperature">Initial temperature (°C)</label>
+            <input
+              type="range"
+              id="initialTemperature"
+              min="20"
+              max="50"
+              step="1"
+              value="20"
+            />
+            <div class="value-display">
+              <span id="initialTemperatureValue">20</span>°C
+            </div>
+          </div>
+          <!-- Boundary temperatures -->
+          <div class="control">
+            <label for="boundaryTop">Boundary temperature: Top (°C)</label>
+            <input
+              type="range"
+              id="boundaryTop"
+              min="20"
+              max="50"
+              step="1"
+              value="50"
+            />
+            <div class="value-display">
+              <span id="boundaryTopValue">50</span>°C
+            </div>
+          </div>
+          <div class="control">
+            <label for="boundaryRight">Boundary temperature: Right (°C)</label>
+            <input
+              type="range"
+              id="boundaryRight"
+              min="20"
+              max="50"
+              step="1"
+              value="50"
+            />
+            <div class="value-display">
+              <span id="boundaryRightValue">50</span>°C
+            </div>
+          </div>
+          <div class="control">
+            <label for="boundaryBottom">Boundary temperature: Bottom (°C)</label>
+            <input
+              type="range"
+              id="boundaryBottom"
+              min="20"
+              max="50"
+              step="1"
+              value="50"
+            />
+            <div class="value-display">
+              <span id="boundaryBottomValue">50</span>°C
+            </div>
+          </div>
+          <div class="control">
+            <label for="boundaryLeft">Boundary temperature: Left (°C)</label>
+            <input
+              type="range"
+              id="boundaryLeft"
+              min="20"
+              max="50"
+              step="1"
+              value="50"
+            />
+            <div class="value-display">
+              <span id="boundaryLeftValue">50</span>°C
+            </div>
+          </div>
+          <!-- Diffusivity -->
+          <div class="control">
+            <label for="diffusivity">Background diffusivity</label>
+            <!-- Adjust the base diffusivity slider to range 0–3.0.  The initial value
+                 is set to 0 for a deep blue background. -->
+            <input
+              type="range"
+              id="diffusivity"
+              min="0"
+              max="3.0"
+              step="0.01"
+              value="0"
+            />
+            <div class="value-display">
+              <span id="diffusivityValue">0.00</span>
+            </div>
+          </div>
+          <!-- Run button -->
+          <button id="runButton">Run Simulation</button>
+          <!-- Progress bar -->
+          <div class="progress-container">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <!-- Status message -->
+          <div id="statusMessage" class="value-display" style="margin-top: 0.5rem; min-height: 1.2rem;"></div>
+        </div>
+      </section>
+    </main>
+    <!-- Include our main script after the DOM -->
+    <script type="module" src="main.js"></script>
+  </body>
+</html>
